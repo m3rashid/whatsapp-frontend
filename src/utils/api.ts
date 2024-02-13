@@ -2,14 +2,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios, { type AxiosRequestConfig } from 'axios';
 
 import {
-  CLIENT_TOKEN_KEY,
+  SERVER_BASE_URL,
+  AUTH_TOKEN_NAME,
   SERVICE_MAX_RETRIES,
   IDEMPOTENCY_KEY_HEADER,
 } from './constants';
 
-const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000',
-});
+const axiosInstance = axios.create({ baseURL: SERVER_BASE_URL });
 
 /**
  * @description Service function to call for APIs in a streamlined fashion
@@ -17,27 +16,30 @@ const axiosInstance = axios.create({
  * ```ts
  * const loginService = Service("/auth/login")
  * await loginService({
- * 	body: { ... },
+ * 	data: { ... },
  * 	// ... other params to override
  * })
  * ```
  */
 export function Service(
   endpoint: string,
+  method = 'POST',
   maxRetries: number = SERVICE_MAX_RETRIES
 ) {
   return async function (config: AxiosRequestConfig = {}) {
     let retryCount = 0;
     const requestID = uuidv4();
+    const token = localStorage.getItem(AUTH_TOKEN_NAME);
 
     while (retryCount < maxRetries) {
       try {
         const res = await axiosInstance(endpoint, {
           ...config,
+          method,
           headers: {
             ...(config.headers || {}),
             [IDEMPOTENCY_KEY_HEADER]: requestID,
-            Authorization: `Bearer ${localStorage.getItem(CLIENT_TOKEN_KEY)}`,
+            Authorization: token ? `Bearer ${token}` : '',
           },
         });
         return res;
@@ -49,13 +51,13 @@ export function Service(
           err.response?.status >= 400 &&
           err.response?.status < 500
         ) {
-          if (err.response?.status === 401) {
-            localStorage.removeItem(CLIENT_TOKEN_KEY);
+          if (err.response?.status === 401 || err.response?.status === 403) {
+            localStorage.removeItem(AUTH_TOKEN_NAME);
             return Promise.reject(err);
           }
 
           console.log('error: ', err);
-          return;
+          // return;
         }
 
         if (retryCount >= maxRetries) {
@@ -70,3 +72,9 @@ export function Service(
     }
   };
 }
+
+export const services = {
+  init: Service('/api/auth/validate-login'),
+  verifyOtp: Service('/api/auth/verify-otp'),
+  checkPhoneNumber: Service('/api/auth/check-phone-number'),
+};
