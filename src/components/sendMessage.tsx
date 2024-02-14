@@ -1,17 +1,36 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
+import { socket } from '../utils/socket';
 
 const SendMessage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    socket.on('message', (message: string) => {
+      console.log(message);
+    });
+    socket.on('error', (error: any) => {
+      console.log(error);
+    });
+
+    socket.on('connect_error', (error: any) => {
+      console.log(error);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   const handleClick = () => {
     try {
-      const input = inputRef.current?.value;
-      if (!input) return;
+      const messageText = inputRef.current?.value;
+      if (!messageText) return;
 
-      console.log(input);
+      console.log(messageText);
       // ... do something
 
-      inputRef.current!.value = '';
+      // inputRef.current!.value = '';
+      socket.emit('message', messageText);
     } catch (err: any) {
       console.log(err);
     }

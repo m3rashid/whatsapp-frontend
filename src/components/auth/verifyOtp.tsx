@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react';
-import { services } from '../../utils/api';
 import { useSetRecoilState } from 'recoil';
+
+import { services } from '../../utils/api';
 import { authAtom } from '../../atoms/auth';
+import { AUTH_TOKEN_NAME } from '../../utils/constants';
 
 type VerifyOtpProps = {
   toggleState: () => void;
@@ -22,10 +24,12 @@ const VerifyOtp: React.FC<VerifyOtpProps> = (props) => {
       const res = await services.verifyOtp({
         data: { otp, phone: props.phone },
       });
-      console.log(res);
 
       // !TODO
-      setAuth({ isAuthenticated: true, user: res?.data.user });
+      if (!res) return;
+
+      localStorage.setItem(AUTH_TOKEN_NAME, res.data.token);
+      setAuth({ isAuthenticated: true, user: res.data.user });
     } catch (err: any) {
       console.log(err);
     } finally {

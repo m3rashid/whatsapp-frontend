@@ -17,7 +17,6 @@ function useInit() {
       setLoading(true);
       const res = await services.init();
       setInitRes(res?.data);
-      console.log(res);
     } catch (err: any) {
       console.log(err);
       setInitRes(null);

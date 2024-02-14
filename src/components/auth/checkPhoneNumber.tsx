@@ -16,8 +16,7 @@ const CheckPhoneNumber: React.FC<CheckPhoneNumberProps> = (props) => {
       const phone = phoneNumberRef.current?.value;
       if (!phone) return;
 
-      const res = await services.checkPhoneNumber({ data: { phone } });
-      console.log(res);
+      await services.checkPhoneNumber({ data: { phone } });
       // !TODO
 
       props.setPhone(phone);
