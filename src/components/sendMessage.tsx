@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+
 import { socket } from '../utils/socket';
 
 const SendMessage = () => {
@@ -25,12 +26,14 @@ const SendMessage = () => {
     try {
       const messageText = inputRef.current?.value;
       if (!messageText) return;
-
-      console.log(messageText);
+      console.log('Sending message', messageText);
       // ... do something
-
       // inputRef.current!.value = '';
-      socket.emit('message', messageText);
+      socket.emit('new-message', {
+        message: messageText,
+        sender: 'user1',
+        receiver: 'user2',
+      });
     } catch (err: any) {
       console.log(err);
     }

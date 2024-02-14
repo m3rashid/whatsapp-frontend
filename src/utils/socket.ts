@@ -13,7 +13,7 @@ import {
 export const socket = io(SERVER_BASE_URL, {
   transports: ['websocket'],
   withCredentials: true,
-  // autoConnect: false,
+  autoConnect: false,
   auth: {
     token: localStorage.getItem(AUTH_TOKEN_NAME),
   },
