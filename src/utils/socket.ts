@@ -15,7 +15,7 @@ export const socket = io(SERVER_BASE_URL, {
   withCredentials: true,
   autoConnect: false,
   auth: {
-    token: localStorage.getItem(AUTH_TOKEN_NAME),
+    token: `Bearer ${localStorage.getItem(AUTH_TOKEN_NAME)}`,
   },
   extraHeaders: {
     [IDEMPOTENCY_KEY_HEADER]: uuidV4(),

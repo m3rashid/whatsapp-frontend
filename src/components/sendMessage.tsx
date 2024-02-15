@@ -6,6 +6,7 @@ const SendMessage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    socket.connect();
     socket.on('message', (message: string) => {
       console.log(message);
     });
@@ -18,6 +19,7 @@ const SendMessage = () => {
     });
 
     return () => {
+      console.log('disconnecting socket');
       socket.disconnect();
     };
   }, []);
